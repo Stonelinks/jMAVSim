@@ -179,9 +179,9 @@ public class Simulator implements Runnable {
         connCommon.addNode(autopilotMavLinkPort);
         // UDP port: connection to ground station
         udpGCMavLinkPort = new UDPMavLinkPort(schema);
-        //udpGCMavLinkPort.setDebug(true);
+        udpGCMavLinkPort.setDebug(true);
         if (COMMUNICATE_WITH_QGC) {
-            udpGCMavLinkPort.setup(0, qgcIpAddress, qgcPeerPort);
+            udpGCMavLinkPort.setupPeerAddressToBindPort(0, qgcIpAddress, qgcPeerPort);
             //udpGCMavLinkPort.setDebug(true);
             if (monitorMessage && USE_SERIAL_PORT)
                 udpGCMavLinkPort.setMonitorMessageID(monitorMessageIds);

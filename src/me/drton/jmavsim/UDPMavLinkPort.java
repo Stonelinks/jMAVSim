@@ -25,7 +25,7 @@ public class UDPMavLinkPort extends MAVLinkPort {
     private boolean monitorMessage = false;
     private HashSet<Integer> monitorMessageIDs;
     private HashMap<Integer, Integer> messageCounts = new HashMap<Integer, Integer>();
-    
+
     static String[] LOCAL_HOST_TERMS = { "localhost", "127.0.0.1" };
     static int MONITOR_MESSAGE_RATE = 100; // rate at which to print message info
     static int TIME_PASSING = 10;         // change the print so it's visible to the user.
@@ -62,6 +62,24 @@ public class UDPMavLinkPort extends MAVLinkPort {
         if (this.bindPort == null) {
             InetAddress localHostExternalIPAddress = getMyHostIPAddress();
             this.bindPort = new InetSocketAddress(localHostExternalIPAddress, bindPort);
+        }
+        if (debug) {
+            System.out.println("peerAddress: " + peerAddress + ", bindAddress: " + this.bindPort.toString());
+        }
+    }
+
+    // same as above, except use peerAddress for bindPort if not running locally
+    public void setupPeerAddressToBindPort(int bindPort, String peerAddress, int peerPort) throws UnknownHostException, IOException {
+        this.peerPort = new InetSocketAddress(peerAddress, peerPort);
+        // If PX4 is running on localhost, we should connect on local host as well.
+        // for (String term : LOCAL_HOST_TERMS) {
+        //     if (peerAddress.equalsIgnoreCase(term)) {
+        //         this.bindPort = new InetSocketAddress(term, bindPort);
+        //     }
+        // }
+        // Otherwise, we should attempt to find the external IP address and connect over that.
+        if (this.bindPort == null) {
+            this.bindPort = new InetSocketAddress(peerAddress, bindPort);
         }
         if (debug) {
             System.out.println("peerAddress: " + peerAddress + ", bindAddress: " + this.bindPort.toString());
@@ -193,7 +211,7 @@ public class UDPMavLinkPort extends MAVLinkPort {
                 MAVLinkMessage msg = stream.read();
                 if (msg == null)
                     break;
-                if (debug) 
+                if (debug)
                     System.out.println("[update] msg.name: " + msg.getMsgName() + ", type: " + msg.getMsgType());
                 IndicateReceivedMessage(msg.getMsgType());
                 sendMessage(msg);
